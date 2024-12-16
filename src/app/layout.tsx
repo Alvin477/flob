@@ -16,13 +16,9 @@ export const metadata: Metadata = {
   title: "FLOB",
   description: "Welcome to FLOB",
   icons: {
-    icon: '/img/favicon.png',
-    shortcut: '/img/favicon.png',
-    apple: '/img/favicon.png',
-    other: {
-      rel: 'apple-touch-icon-precomposed',
-      url: '/img/favicon.png',
-    },
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
   },
 };
 
@@ -34,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/img/favicon.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
