@@ -18,37 +18,75 @@ export function Hero() {
   const time = useRef(0)
   const velocity = useRef({ x: 0, y: 0, rotation: 0 })
   const position = useRef({ x: 0, y: 0, rotation: 0 })
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  // Flog's movement (keeping exactly the same)
+  // Add drag constraints
+  const dragConstraints = {
+    left: -300,
+    right: 300,
+    top: -200,
+    bottom: 200
+  }
+
   useEffect(() => {
     let animationFrame: number
+    let bounds = { width: 0, height: 0 }
+
+    const updateBounds = () => {
+      if (containerRef.current) {
+        bounds = {
+          width: containerRef.current.clientWidth,
+          height: containerRef.current.clientHeight
+        }
+      }
+    }
+
+    updateBounds()
+    window.addEventListener('resize', updateBounds)
 
     const updatePosition = () => {
-      time.current += 0.001
+      // Slower time increment
+      time.current += 0.0004
 
       if (!isMoving.current) {
-        const noiseX = noise(time.current) * 0.01
-        const noiseY = noise(time.current + 100) * 0.01
-        const noiseRotation = noise(time.current + 200) * 0.02
+        // Reduced movement range
+        const noiseX = noise(time.current) * 0.006
+        const noiseY = noise(time.current + 100) * 0.006
+        const noiseRotation = noise(time.current + 200) * 0.004
 
-        velocity.current.x += noiseX
-        velocity.current.y += noiseY
-        velocity.current.rotation += noiseRotation
+        // Gentler force application
+        velocity.current.x += noiseX * (1 - Math.abs(velocity.current.x) * 0.08)
+        velocity.current.y += noiseY * (1 - Math.abs(velocity.current.y) * 0.08)
+        velocity.current.rotation += noiseRotation * (1 - Math.abs(velocity.current.rotation) * 0.1)
       }
 
-      velocity.current.x *= 0.999
-      velocity.current.y *= 0.999
-      velocity.current.rotation *= 0.998
+      // Stronger damping for slower movement
+      velocity.current.x *= 0.995
+      velocity.current.y *= 0.995
+      velocity.current.rotation *= 0.997
 
       position.current.x += velocity.current.x
       position.current.y += velocity.current.y
       position.current.rotation += velocity.current.rotation
 
-      if (Math.abs(position.current.x) > 150) {
-        velocity.current.x *= -0.2
+      // Keep within screen bounds with gentle pushback
+      const margin = 90 // Margin from screen edges
+      const maxX = (bounds.width / 2) - margin
+      const maxY = (bounds.height / 2) - margin
+
+      if (Math.abs(position.current.x) > maxX) {
+        // Gentle pushback when near edges
+        const excess = Math.abs(position.current.x) - maxX
+        position.current.x = Math.sign(position.current.x) * maxX
+        velocity.current.x = -velocity.current.x * 0.3 // Soft bounce
+        velocity.current.x -= Math.sign(position.current.x) * excess * 0.01
       }
-      if (Math.abs(position.current.y) > 100) {
-        velocity.current.y *= -0.2
+
+      if (Math.abs(position.current.y) > maxY) {
+        const excess = Math.abs(position.current.y) - maxY
+        position.current.y = Math.sign(position.current.y) * maxY
+        velocity.current.y = -velocity.current.y * 0.3 // Soft bounce
+        velocity.current.y -= Math.sign(position.current.y) * excess * 0.01
       }
 
       controls.set({
@@ -63,24 +101,33 @@ export function Hero() {
     const addRandomImpulse = () => {
       if (!isMoving.current) {
         const angle = Math.random() * Math.PI * 2
-        const force = Math.random() * 0.2
-        velocity.current.x += Math.cos(angle) * force
-        velocity.current.y += Math.sin(angle) * force
-        velocity.current.rotation += (Math.random() - 0.5) * 0.5
+        // Gentler random movements
+        const force = Math.random() * 0.15
+        const currentSpeed = Math.sqrt(
+          velocity.current.x * velocity.current.x + 
+          velocity.current.y * velocity.current.y
+        )
+        const scaleFactor = Math.max(0.15, 1 - currentSpeed * 0.4)
+        
+        velocity.current.x += Math.cos(angle) * force * scaleFactor
+        velocity.current.y += Math.sin(angle) * force * scaleFactor
+        velocity.current.rotation += (Math.random() - 0.5) * 0.1 * scaleFactor
       }
-      setTimeout(addRandomImpulse, Math.random() * 10000 + 8000)
+      // Longer intervals between impulses
+      setTimeout(addRandomImpulse, Math.random() * 12000 + 10000)
     }
 
     updatePosition()
     addRandomImpulse()
 
     return () => {
+      window.removeEventListener('resize', updateBounds)
       cancelAnimationFrame(animationFrame)
     }
   }, [controls])
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden" ref={containerRef}>
       <Image
         src="/img/background.png"
         alt="Hero background"
@@ -131,19 +178,19 @@ export function Hero() {
             </motion.div>
           </div>
 
-          {/* Flog - keeping exactly the same physics */}
+          {/* Flog */}
           <motion.div 
-            className="absolute w-[180px] h-[180px] left-[60%]"
+            className="absolute w-[180px] h-[180px]"
             animate={controls}
             onDragStart={() => isMoving.current = true}
             onDragEnd={() => isMoving.current = false}
             drag
+            dragConstraints={dragConstraints}
             dragTransition={{
-              power: 0.02,
-              timeConstant: 800,
-              modifyTarget: target => Math.max(-150, Math.min(150, target))
+              power: 0.01,
+              timeConstant: 1200
             }}
-            dragElastic={0.02}
+            dragElastic={0.005}
           >
             <Image
               src="/img/flog.png"
