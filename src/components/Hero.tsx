@@ -138,8 +138,8 @@ export function Hero() {
 
       <div className="absolute inset-0 z-10">
         <div className="absolute inset-0 flex items-center justify-center">
-          {/* Rocket */}
-          <div className="absolute w-[300px] h-[300px] left-1/4 -translate-x-1/2">
+          {/* Rocket - adjusted for mobile */}
+          <div className="absolute w-[300px] h-[300px] md:left-1/4 left-1/2 -translate-x-1/2 -translate-y-24 md:translate-y-0">
             <motion.div 
               className="w-full h-full"
               animate={{
@@ -178,9 +178,9 @@ export function Hero() {
             </motion.div>
           </div>
 
-          {/* Flog */}
+          {/* Flog - adjusted for mobile */}
           <motion.div 
-            className="absolute w-[180px] h-[180px]"
+            className="absolute w-[180px] h-[180px] translate-y-32 md:translate-y-0 md:left-[60%]"
             animate={controls}
             onDragStart={() => isMoving.current = true}
             onDragEnd={() => isMoving.current = false}
