@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 
 export function SocialLinks() {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-20 pb-12 pt-24 bg-gradient-to-t from-black/80 to-transparent">
+    <div className="absolute bottom-0 left-0 right-0 z-20 pb-8 pt-20 bg-gradient-to-t from-black/80 to-transparent">
       <div className="max-w-4xl mx-auto flex flex-col items-center gap-8">
         {/* Logo Image */}
         <motion.div

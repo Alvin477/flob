@@ -5,6 +5,11 @@
 .space-bg {
   background: #000000;
   background: linear-gradient(180deg, #000000 0%, #050520 100%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 @keyframes floatAnimation {
@@ -20,6 +25,10 @@
   animation: floatAnimation 6s ease-in-out infinite;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  @apply bg-black text-white overflow-hidden;
+  @apply bg-black text-white;
 }
